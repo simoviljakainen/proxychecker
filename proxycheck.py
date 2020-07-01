@@ -23,7 +23,6 @@ def loadProxy(fileIn):
         exit(1)
 
 def isWorking(httpsProxy):
-    
     proxies = {"https" : f"https://{httpsProxy}"}
 
     try:
@@ -51,9 +50,9 @@ def isWorking(httpsProxy):
 
     return True
 
-def processProxy(lock, q, out, counter):
+def processProxy(lock, que, out, counter):
     while True:
-        httpsProxy = q.get()
+        httpsProxy = que.get()
 
         # Save working proxy
         if(isWorking(httpsProxy)):
@@ -61,10 +60,10 @@ def processProxy(lock, q, out, counter):
                 out.write(httpsProxy + '\n')
                 counter[0] += 1
 
-        q.task_done()
+        que.task_done()
 
 def main(fileIn, fileOut, threads):
-    q = Queue()
+    que = Queue()
     lock = Lock()
     counter = [0]
 
@@ -72,7 +71,7 @@ def main(fileIn, fileOut, threads):
 
         for _ in range(threads):
             thread = Thread(target=processProxy,
-                args=(lock, q, out, counter)
+                args=(lock, que, out, counter)
             )
 
             # Daemon thread dies after main thread dies
@@ -81,7 +80,7 @@ def main(fileIn, fileOut, threads):
 
         # Insert proxies into queue
         for num, proxyline in enumerate(loadProxy(fileIn), start=1):
-            q.put(proxyline.strip())
+            que.put(proxyline.strip())
 
         else:
             print(
@@ -91,7 +90,7 @@ def main(fileIn, fileOut, threads):
             )
 
         # Main thread waits until the queue has been processed
-        q.join()
+        que.join()
 
     try:
         print(
