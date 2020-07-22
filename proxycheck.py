@@ -16,11 +16,11 @@ def loadProxy(fileIn):
 
     except FileNotFoundError:
         print("File not found.")
-        exit(1)
+        sys.exit(1)
 
     except Exception as e:
         print(f"There was a problem with the input file:\n{e}")
-        exit(1)
+        sys.exit(1)
 
 def isWorking(httpsProxy):
     proxies = {"https" : f"https://{httpsProxy}"}
